@@ -13,6 +13,7 @@ var app = express();
 //setup middleware that processes our body (into JSON)
 app.use(bodyParser.json())
 
+// ------------------POST LISTING--------------------------------------
 // This is setting up a response to a request for the /listings api request. So when the server recieves a www.XXXXX.com/listings HTTP POST request (with some data in the request body) it will create a local variable and make the local variable equal to the data that was sent via the POST request.
 app.post('/listings', (req,res) => {
     var listing = new Listing({
@@ -28,6 +29,16 @@ app.post('/listings', (req,res) => {
 });
 
 
+// ---------------GET LISTING--------------------------------------
+// This is setting up a response to a request for the /listings api request. So when the server recieves a www.XXXXX.com/listings HTTP POST request (with some data in the request body) it will create a local variable and make the local variable equal to the data that was sent via the POST request.
+app.get('/listings', async (req,res) => {
+    try{
+        const serverListings = await Listing.find();
+        res.send({serverListings});
+    }catch (e){
+        res.status(400).send(`failed to get users due to error: ${e}`)
+    }
+});
 
 app.listen(3000, () => {
     console.log('Started on port 3000');
