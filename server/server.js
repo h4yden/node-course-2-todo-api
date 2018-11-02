@@ -3,6 +3,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 
 // Local Imports
+var {ObjectID} = require('mongodb');
 var {mongoose} = require('./db/mongoose');//need to understand why destructured here
 var {User} = require('./models/user');
 var {Listing} = require('./models/listing');
@@ -14,7 +15,7 @@ var app = express();
 app.use(bodyParser.json())
 
 // ------------------POST LISTING--------------------------------------
-// This is setting up a response to a request for the /listings api request. So when the server recieves a www.XXXXX.com/listings HTTP POST request (with some data in the request body) it will create a local variable and make the local variable equal to the data that was sent via the POST request.
+// This is setting up a response to a POST request for the /listings api request. So when the server recieves a www.XXXXX.com/listings HTTP POST request (with some data in the request body) it will create a local variable and make the local variable equal to the data that was sent via the POST request.
 app.post('/listings', (req,res) => {
     var listing = new Listing({
         text: req.body.text
@@ -29,8 +30,8 @@ app.post('/listings', (req,res) => {
 });
 
 
-// ---------------GET LISTING--------------------------------------
-// This is setting up a response to a request for the /listings api request. So when the server recieves a www.XXXXX.com/listings HTTP POST request (with some data in the request body) it will create a local variable and make the local variable equal to the data that was sent via the POST request.
+// ---------------GET LISTINGS--------------------------------------
+// This is setting up a response to a request for the /listings api request. So when the server recieves a www.XXXXX.com/listings HTTP GET request it will send the data we decide should be returned for the /listings address.
 app.get('/listings', async (req,res) => {
     try{
         const serverListings = await Listing.find();
@@ -40,8 +41,36 @@ app.get('/listings', async (req,res) => {
     }
 });
 
+// ---------------GET LISTING with Parameter --------------------------
+// This is setting up a response to a request for the /listings api request. So when the server recieves a www.XXXXX.com/listings HTTP POST request (with some data in the request body) it will create a local variable and make the local variable equal to the data that was sent via the POST request.
+app.get('/listings/:id', async (req,res) => {
+   const id = req.params.id;
+   //console.log('We have ID: ', id);
+    //Valid using isValid
+   if(!ObjectID.isValid(id)){
+       //send 404 status if invalid
+        return res.status(404).send();
+   }
+   //console.log('We are now past checking valid ID');
+   //find listing by ID    
+    try{
+        let theListing = await Listing.findById(id);
+        if(!theListing){
+                 return res.status(404).send();
+                //  console.log('the listing is undefined so the id was valid but it didnt exist');
+             }
+         res.send({theListing});
+         //console.log('Should only get here if everything works well');
+    }catch(e){
+        res.status(400).send();
+    }
+});
+
+
+
+//-------------Server Listen Port------------
 app.listen(3000, () => {
-    console.log('Started on port 3000');
+    //console.log('Started on port 3000');
 })
 
 // toNotExist has been renamed in new expect toBeFalsy
