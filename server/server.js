@@ -45,22 +45,23 @@ app.get('/listings', async (req,res) => {
 // This is setting up a response to a request for the /listings api request. So when the server recieves a www.XXXXX.com/listings HTTP POST request (with some data in the request body) it will create a local variable and make the local variable equal to the data that was sent via the POST request.
 app.get('/listings/:id', async (req,res) => {
    const id = req.params.id;
-   //console.log('We have ID: ', id);
+//    console.log('We have ID: ', id);
     //Valid using isValid
    if(!ObjectID.isValid(id)){
        //send 404 status if invalid
+    //    console.log('invalid ID', ObjectID.isValid(id));
         return res.status(404).send();
    }
-   //console.log('We are now past checking valid ID');
+//    console.log('We are now past checking valid ID');
    //find listing by ID    
     try{
         let theListing = await Listing.findById(id);
         if(!theListing){
-                 return res.status(404).send();
-                //  console.log('the listing is undefined so the id was valid but it didnt exist');
+            // console.log('the listing is undefined so the id was valid but it didnt exist');    
+            return res.status(404).send();
              }
          res.send({theListing});
-         //console.log('Should only get here if everything works well');
+        //  console.log('Should only get here if everything works well');
     }catch(e){
         res.status(400).send();
     }

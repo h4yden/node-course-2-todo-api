@@ -1,14 +1,17 @@
 const expect = require('expect');
 const request = require('supertest');
+var {ObjectID} = require('mongodb');
 
 const {app} = require('./../server'); // ./ relative path ../ is back a directory.
 const {Listing} = require('./../models/listing');
 
 
 const dummyListings = [{
+    _id: new ObjectID(),
     text: 'Listing 1'
 },
-{
+{   
+    _id: new ObjectID(),
     text: 'Listing 2'
 }]
 
@@ -81,4 +84,46 @@ describe('GET /listings', () => { //just a title for the test suite
             expect(res.body.serverListings.length).toBe(2);
         })
     });
+});
+
+// --------------TEST SUITE for GET /listings/:id request--------
+describe('GET /listings/:id', () => { //just a title for the test suite
+    //GET request test.
+    it('should get the requested listing', async () => { //name for a test in the test suite.
+        await request(app)
+        .get(`/listings/${dummyListings[0]._id}`) //this defines the actual api call
+        .expect(200) //expect a success status
+        .expect((res) => { //custom expect test function
+            //console.log(`TEST BODY:${JSON.stringify(res)}`);
+            expect(res.body.theListing.text).toBe(dummyListings[0].text);
+        })
+    });
+
+    it('should return 404 if listing not found', async() => {
+        const hexId = new ObjectID().toHexString();
+        
+        await request(app)
+        .get(`/listings/${hexId}`)
+        .expect(404)        
+    });
+
+    it('should return 404 for non-object ids', async() => {
+        await request(app)
+        .get(`/listings/sfkgjbsdjkfb`)
+        .expect(404) 
+    });
+
+    // it('should return 404 if listing not found', (done) => {
+    //     request(app)
+    //     .get(`/listings/5bdce3f27355960c5cc629fa`)
+    //     .expect(404)
+    //     .end(done);        
+    // });
+
+    // it('should return 404 for non-object ids', (done) => {
+    //     request(app)
+    //     .get(`/listings/sfkgjbsdjkfb`)
+    //     .expect(404) 
+    //     .end(done);
+    // });
 });
